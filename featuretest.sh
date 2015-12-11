@@ -75,7 +75,7 @@ evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable channel number: 2"
 echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -c 2 --log=$logdir/$feature_cnt.log
+$bin -P $dev_playback -C $dev_capture -c 2 -F 19:16757 --log=$logdir/$feature_cnt.log
 evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable sample rate: 44100"
