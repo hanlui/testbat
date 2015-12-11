@@ -1,23 +1,13 @@
 #!/bin/bash
 
 ###########################################################################
-#            BAT sound path test: connection and command
+#            BAT sound path test: connection
 #==========================================================================
-#    command for mono channel test:
-#      $ ./testbat-all.sh 1 <number of repeats>
-#    command will pause.
-#    for each item a), b) and c), connect cable and hit 'Enter' to continue.
-#    to bypass, input 'b'.
 #    connection for mono channel test: (an adapter must be applied)
 #    a) DP hp		<---> adapter mic
 #    b) HDMI hp		<---> adapter mic
 #    c) adapter hp	<---> adapter mic
 #
-#    command for dual channel test:
-#      $ ./testbat-all.sh 2 <number of repeats>
-#    command will pause.
-#    for each item a), b) and c), connect cable and hit 'Enter' to continue.
-#    to bypass, input 'b'.
 #    connection for dual channel test:
 #    a) DP hp		<---> line in mic
 #    b) HDMI hp		<---> line in mic
@@ -95,20 +85,26 @@ echo "========================================="
 echo "usage:"
 echo "  $0 <channels>"
 echo "  $0 <channels> <loops>"
-echo "  $0 <hdmi playback dev> <dp playback dev> <analog playback dev> <analog capture dev> <channels> <loops>"
+echo "  $0 <channels> <loops> <analog playback dev> <analog capture dev>"
+echo "  $0 <channels> <loops> <analog playback dev> <analog capture dev> <hdmi playback dev> <dp playback dev>"
 
-if [ $# -eq 6 ]; then
-	devhp=$1
-	devdp=$2
-	devap=$3
-	devac=$4
-	chans=$5
-	loops=$6
+if [ $# -eq 1 ]; then
+	chans=$1
 elif [ $# -eq 2 ]; then
 	chans=$1
 	loops=$2
-elif [ $# -eq 1 ]; then
+elif [ $# -eq 4 ]; then
 	chans=$1
+	loops=$2
+	devap=$3
+	devac=$4
+elif [ $# -eq 6 ]; then
+	chans=$1
+	loops=$2
+	devap=$3
+	devac=$4
+	devhp=$5
+	devdp=$6
 fi
 
 echo "current setting:"
