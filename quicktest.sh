@@ -6,13 +6,14 @@ freq=("16387")
 #freq=("16387" "8177" "4091" "2049" "1023" "511" "257" "123" "67" "29" "17")
 
 echo ""
-echo "******************************"
-echo "      bat stress test         "
-echo "------------------------------"
+echo "********************************************"
+echo "              bat quick test                "
+echo "--------------------------------------------"
+echo "bat quick test at given frequency ${freq[0]}"
 echo "usage:"
-echo "  bs.sh <samples>"
-echo "  bs.sh <samples> <loops>"
-echo "******************************"
+echo "  $0 <samples>"
+echo "  $0 <samples> <loops>"
+echo "********************************************"
 echo ""
 
 if [ $# -eq 2 ]; then
