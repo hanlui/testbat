@@ -100,22 +100,22 @@ evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable data depth: 8 bit"
 echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f U8 --saveplay U8_2.wav --log=$logdir/$feature_cnt.log
+$bin -P $dev_playback -C $dev_capture -f U8 --saveplay U8.wav --log=$logdir/$feature_cnt.log
 evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable data depth: 16 bit"
 echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f S16_LE --saveplay S16_LE_2.wav --log=$logdir/$feature_cnt.log
+$bin -P $dev_playback -C $dev_capture -f S16_LE --saveplay S16_LE.wav --log=$logdir/$feature_cnt.log
 evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable data depth: 24 bit"
 echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f S24_3LE --saveplay S24_3LE_2.wav --log=$logdir/$feature_cnt.log
+$bin -P $dev_playback -C $dev_capture -f S24_3LE --saveplay S24_3LE.wav --log=$logdir/$feature_cnt.log
 evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable data depth: 32 bit"
 echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f S32_LE --saveplay S32_LE_2.wav --log=$logdir/$feature_cnt.log
+$bin -P $dev_playback -C $dev_capture -f S32_LE --saveplay S32_LE.wav --log=$logdir/$feature_cnt.log
 evaluate_result $?
 echo "============================================"
 echo "$feature_cnt: configurable data depth: cd"
