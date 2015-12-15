@@ -34,6 +34,7 @@ echo "*******************************************"
 echo "            BAT feature tests              "
 echo "-------------------------------------------"
 echo "usage:"
+echo "  $0 <sound card>"
 echo "  $0 <device-playback> <device-capture>"
 
 # init
