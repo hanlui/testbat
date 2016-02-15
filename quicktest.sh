@@ -28,7 +28,7 @@ do
 	pass=0
 #	for i in {1..3}
 	for ((i=0; i<${loops}; )); do
-		bat -F $f -n $samples --log=tmp.log
+		alsabat -F $f -n $samples --log=tmp.log
 		if [ $? -eq 0 ]; then
 			let pass=pass+1
 		fi

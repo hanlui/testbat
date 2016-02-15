@@ -14,7 +14,7 @@
 #    c) line out hp	<---> line in mic
 #
 
-bin="bat"
+bin="alsabat"
 log="$0.log"
 
 # default device: hdmi playback

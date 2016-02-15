@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bin="bat"
+bin="alsabat"
 file_sin="default.wav"
 logdir="tmp"
 # default devices
@@ -53,6 +53,9 @@ echo "current setting:"
 echo "  $0 $dev_playback $dev_capture"
 
 # test items
+if false; then
+echo "content to bypass"
+fi
 echo "============================================"
 echo "$feature_cnt: generate test file with default params"
 echo "-------------------------------------------"
@@ -127,6 +130,18 @@ echo "============================================"
 echo "$feature_cnt: configurable data depth: dat"
 echo "-------------------------------------------"
 $bin -P $dev_playback -C $dev_capture -f dat --log=$logdir/$feature_cnt.log
+evaluate_result $?
+echo "============================================"
+echo "$feature_cnt: standalone mode: play and capture"
+echo "-------------------------------------------"
+tmpfreq=17583
+$bin -P $dev_playback -C $dev_capture -F $tmpfreq --standalone --log=$logdir/$feature_cnt.log
+evaluate_result $?
+echo "============================================"
+echo "$feature_cnt: local mode: analyze local file"
+echo "-------------------------------------------"
+latestfile=`ls -t1 /tmp/bat.wav.* | head -n 1`
+$bin -P $dev_playback -C $dev_capture --local -F $tmpfreq --file $latestfile --log=$logdir/$feature_cnt.log
 evaluate_result $?
 print_result
 echo "*******************************************"
