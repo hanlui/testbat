@@ -1,7 +1,10 @@
 #!/bin/bash
 
-bin="alsabat"
+#set -x
+
+exe="alsabat"
 file_sin="default.wav"
+file_sin_dual="default_dual.wav"
 logdir="tmp"
 # default devices
 dev_playback="default"
@@ -9,6 +12,10 @@ dev_capture="default"
 # features passes vs. features all
 feature_pass=0
 feature_cnt=0
+
+commands="$exe -P $dev_playback -C $dev_capture"
+
+use_tinyalsa=false
 
 init_counter () {
 	feature_pass=0
@@ -30,18 +37,97 @@ print_result () {
 	echo "[$feature_pass/$feature_cnt] features passes."
 }
 
+feature_test () {
+	echo "============================================"
+	echo "$feature_cnt: ALSA $2"
+	echo "-------------------------------------------"
+	echo "$commands $1 --log=$logdir/$feature_cnt.log"
+	$commands $1 --log=$logdir/$feature_cnt.log
+	evaluate_result $?
+	echo "$commands $1" >> $logdir/$((feature_cnt-1)).log
+}
+
+# test items
+feature_list_test () {
+	commands="$exe"
+	feature_test "--saveplay ${file_sin}" "generate test file with default params"
+	commands="$exe -P $dev_playback -C $dev_capture"
+	if false; then
+	echo "content to bypass"
+	fi
+	feature_test "--file ${file_sin}" "play wav file and detect"
+	feature_test "" "generate sine wave and detect"
+	feature_test "-c1" "configurable channel number: 1"
+	feature_test "-c2 -F 19:16757" "configurable channel number: 2"
+	feature_test "-r44100" "configurable sample rate: 44100"
+	feature_test "-r48000" "configurable sample rate: 48000"
+	feature_test "-n16387" "configurable duration: in samples"
+	feature_test "-n2.5s" "configurable duration: in seconds"
+	feature_test "-f U8 --saveplay U8.wav" "configurable data depth: 8 bit"
+	feature_test "-f S16_LE --saveplay S16_LE.wav" "configurable data depth: 16 bit"
+	feature_test "-f S24_3LE --saveplay S24_3LE.wav" "configurable data depth: 24 bit"
+	feature_test "-f S32_LE --saveplay S32_LE.wav" "configurable data depth: 32 bit"
+	feature_test "-f cd --saveplay cd.wav" "configurable data depth: cd"
+	feature_test "-f dat --saveplay dat.wav" "configurable data depth: dat"
+	tmpfreq=17583
+	feature_test "-F $tmpfreq --standalone" "standalone mode: play and capture"
+	latestfile=`ls -t1 /tmp/bat.wav.* | head -n 1`
+	feature_test "--local -F $tmpfreq --file $latestfile" "local mode: analyze local file"
+
+	print_result
+}
+
+feature_test_tiny () {
+	echo "============================================"
+	echo "$feature_cnt: tinyalsa $2"
+	echo "-------------------------------------------"
+	echo "$commands -c2 -t $1 --log=$logdir/$feature_cnt.log"
+	$commands -c2 -t $1 --log=$logdir/$feature_cnt.log
+	evaluate_result $?
+	echo "$commands -c2 -t $1" >> $logdir/$((feature_cnt-1)).log
+}
+
+# tinyalsa test items; device may not support "default" name nor some formats
+feature_list_test_tiny () {
+	commands="$exe -P $dev_playback -C $dev_capture"
+	if false; then
+	echo "content to bypass"
+	fi
+	feature_test_tiny "--saveplay ${file_sin_dual}" "generate sine wave and detect"
+	feature_test_tiny "--file ${file_sin_dual}" "play wav file and detect"
+	feature_test_tiny "-F 19:16757" "configurable channel number: 2"
+	feature_test_tiny "-r44100" "configurable sample rate: 44100"
+	feature_test_tiny "-r48000" "configurable sample rate: 48000"
+	feature_test_tiny "-n16387" "configurable duration: in samples"
+	feature_test_tiny "-n2.5s" "configurable duration: in seconds"
+	feature_test_tiny "-f U8 --saveplay U8.wav" "configurable data depth: 8 bit"
+	feature_test_tiny "-f S16_LE --saveplay S16_LE.wav" "configurable data depth: 16 bit"
+	feature_test_tiny "-f S32_LE --saveplay S32_LE.wav" "configurable data depth: 32 bit"
+	feature_test_tiny "-f cd --saveplay cd.wav" "configurable data depth: cd"
+	feature_test_tiny "-f dat --saveplay dat.wav" "configurable data depth: dat"
+	tmpfreq=17583
+	feature_test_tiny "-F $tmpfreq --standalone" "standalone mode: play and capture"
+	latestfile=`ls -t1 /tmp/bat.wav.* | head -n 1`
+	feature_test_tiny "--local -F $tmpfreq --file $latestfile" "local mode: analyze local file"
+
+	print_result
+	}
+
 echo "*******************************************"
 echo "            BAT feature tests              "
 echo "-------------------------------------------"
+
+# get device
 echo "usage:"
 echo "  $0 <sound card>"
 echo "  $0 <device-playback> <device-capture>"
+echo "  $0 <device-playback> <device-capture> <tinyalsa>"
 
-# init
-mkdir -p $logdir
-init_counter
-
-if [ $# -eq 2 ]; then
+if [ $# -eq 3 ]; then
+	dev_playback=$1
+	dev_capture=$2
+	use_tinyalsa=true
+elif [ $# -eq 2 ]; then
 	dev_playback=$1
 	dev_capture=$2
 elif [ $# -eq 1 ]; then
@@ -52,96 +138,14 @@ fi
 echo "current setting:"
 echo "  $0 $dev_playback $dev_capture"
 
-# test items
-if false; then
-echo "content to bypass"
+# run
+logdir="tmp"
+mkdir -p $logdir
+init_counter
+if [ $use_tinyalsa ]; then
+	feature_list_test_tiny
+else
+	feature_list_test
 fi
-echo "============================================"
-echo "$feature_cnt: generate test file with default params"
-echo "-------------------------------------------"
-$bin --saveplay ${file_sin} --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: play wav file and detect"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture --file ${file_sin} --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: generate sine wave and detect"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable channel number: 1"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -c 1 --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable channel number: 2"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -c 2 -F 19:16757 --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable sample rate: 44100"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -r 44100 --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable sample rate: 48000"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -r 48000 --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable duration: in samples"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -n 16387 --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable duration: in seconds"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -n 2.5s --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable data depth: 8 bit"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f U8 --saveplay U8.wav --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable data depth: 16 bit"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f S16_LE --saveplay S16_LE.wav --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable data depth: 24 bit"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f S24_3LE --saveplay S24_3LE.wav --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable data depth: 32 bit"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f S32_LE --saveplay S32_LE.wav --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable data depth: cd"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f cd --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: configurable data depth: dat"
-echo "-------------------------------------------"
-$bin -P $dev_playback -C $dev_capture -f dat --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: standalone mode: play and capture"
-echo "-------------------------------------------"
-tmpfreq=17583
-$bin -P $dev_playback -C $dev_capture -F $tmpfreq --standalone --log=$logdir/$feature_cnt.log
-evaluate_result $?
-echo "============================================"
-echo "$feature_cnt: local mode: analyze local file"
-echo "-------------------------------------------"
-latestfile=`ls -t1 /tmp/bat.wav.* | head -n 1`
-$bin -P $dev_playback -C $dev_capture --local -F $tmpfreq --file $latestfile --log=$logdir/$feature_cnt.log
-evaluate_result $?
-print_result
+
 echo "*******************************************"
