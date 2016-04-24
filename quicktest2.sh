@@ -1,6 +1,8 @@
 #!/bin/bash
 
-freq=("16387" "8177" "4091" "2049" "1023" "511" "257" "123" "67" "29" "17")
+#freq=("16387" "8177" "4091" "2049" "1023" "511" "257" "123" "67" "29" "17")
+#freq=("16384" "8152" "4096" "2048" "1024" "512" "256" "128" "64" "32" "16")
+freq=("16547" "8273" "4139" "2069" "1033" "521" "257" "131" "67" "31" "17")
 tmpdir="tmpwav"
 
 echo ""
@@ -14,9 +16,8 @@ echo "     <blank to use current file>"
 echo "********************************************"
 echo ""
 
-generate=$1
 mkdir $tmpdir -p
-if [ $generate = "1" ]; then
+if [ $# -eq 1 ]; then
 	for f in "${freq[@]}"
 	do
 		alsabat -Pdefault --standalone -F $f --saveplay "$tmpdir/$f.wav"

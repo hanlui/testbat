@@ -26,7 +26,7 @@ evaluate_result () {
 	else
 		echo "fail"
 	fi
-	sleep 4
+#	sleep 4
 }
 
 print_result () {
